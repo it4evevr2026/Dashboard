@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แดชบอร์ดยอดขาย | Shopee · Lazada · TikTok | ม.ค.–พ.ค. 2569</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --text: #1a1a2e;
+    --text2: #555770;
+    --text3: #888a9b;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shopee: #EE4D2D;
+    --lazada: #1251B5;
+    --tiktok: #333333;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1117;
+      --surface: #1c1e2a;
+      --surface2: #252836;
+      --text: #e8eaf6;
+      --text2: #9ea3bf;
+      --text3: #666880;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+    }
+  }
+
+  body {
+    font-family: 'Segoe UI', 'Noto Sans Thai', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border2);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .header-logo {
+    width: 36px;
+    height: 36px;
+    background: #1F3864;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 6px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text2);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .tab.active { background: #1F3864; color: #fff; border-color: #1F3864; }
+  .tab:hover:not(.active) { background: var(--surface2); }
+
+  main { padding: 1.25rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .metric {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .9rem 1rem;
+  }
+  .metric-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .metric-value { font-size: 22px; font-weight: 600; color: var(--text); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .trend-up { color: #3B6D11; }
+  .trend-dn { color: #A32D2D; }
+
+  .warn {
+    background: #FFF8E7;
+    border: 0.5px solid #F0C060;
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    font-size: 12px;
+    color: #7A5000;
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  @media (prefers-color-scheme: dark) {
+    .warn { background: #2a2210; border-color: #7a5a10; color: #f0c060; }
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .charts-grid.full { grid-template-columns: 1fr; }
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.1rem;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: .6rem;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: .6rem;
+  }
+  .leg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .leg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 11px;
+    color: var(--text3);
+    border-top: 0.5px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .charts-grid { grid-template-columns: 1fr; }
+    main { padding: 1rem; }
+    header { padding: .75rem 1rem; }
+    .tabs { margin-left: 0; width: 100%; }
+  }
+
+  /* ===== ANOMALY + MONTHLY DIFF SECTION ===== */
+  .section-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.5rem 0 .75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--border2);
+  }
+  .diff-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 12px;
+  }
+  .diff-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 640px;
+  }
+  .diff-tbl th {
+    background: var(--surface2);
+    color: var(--text3);
+    padding: 7px 10px;
+    text-align: right;
+    border: 0.5px solid var(--border2);
+    font-weight: 500;
+    font-size: 11px;
+  }
+  .diff-tbl th:first-child { text-align: left; min-width: 155px; }
+  .diff-tbl td {
+    padding: 6px 10px;
+    border: 0.5px solid var(--border2);
+    text-align: right;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .diff-tbl td:first-child {
+    text-align: left;
+    color: var(--text2);
+    background: var(--surface2);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .abs-val { color: var(--text); font-size: 12px; font-weight: 500; }
+  .pct-val { color: var(--text3); font-size: 10.5px; }
+  .d-ok  { background: #EAF3DE22; }
+  .d-warn{ background: #FFF8E730; }
+  .d-bad { background: #FCEBEB50; }
+  .d-crit{ background: #F7C1C166; font-weight: 600; }
+  .d-neg { background: #F7C1C166; }
+  .neg   { color: #A32D2D; font-weight: 600; }
+  @media (prefers-color-scheme: dark) {
+    .d-ok  { background: #17340420; }
+    .d-warn{ background: #41240220; }
+    .d-bad { background: #50131320; }
+    .d-crit{ background: #50131340; }
+    .neg   { color: #F09595; }
+  }
+  .plat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 1rem 0 .4rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* FIX CARDS */
+  .fix-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .fix-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-left: 4px solid var(--border2);
+    border-radius: var(--radius);
+    padding: .8rem 1rem;
+  }
+  .fix-card.critical { border-left-color: #C0392B; }
+  .fix-card.warning  { border-left-color: #E67E22; }
+  .fix-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: .5rem;
+  }
+  .fix-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .fix-badge.crit { background: #FCEBEB; color: #C0392B; }
+  .fix-badge.warn { background: #FFF3E0; color: #E67E22; }
+  @media (prefers-color-scheme: dark) {
+    .fix-badge.crit { background: #501313; color: #F09595; }
+    .fix-badge.warn { background: #412402; color: #FAC775; }
+  }
+  .fix-title { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .fix-body { font-size: 11.5px; color: var(--text2); line-height: 1.65; }
+  .fix-body li { margin-left: 1rem; margin-bottom: 2px; }
+  .fix-body ul { padding-left: 0; list-style: disc; margin-left: 1rem; }
+  .month-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--text3);
+    margin-right: 3px;
+  }
+  .month-tag.bad { background: #FCEBEB; color: #A32D2D; }
+  @media (prefers-color-scheme: dark) {
+    .month-tag.bad { background: #501313; color: #F09595; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">H</div>
+  <div>
+    <div class="header-title">HOMMKESA — แดชบอร์ดวิเคราะห์ยอดขาย</div>
+    <div class="header-sub">Shopee · Lazada · TikTok &nbsp;|&nbsp; มกราคม – พฤษภาคม 2569</div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-p="all">ทั้งหมด</button>
+    <button class="tab" data-p="shopee">🟠 Shopee</button>
+    <button class="tab" data-p="lazada">🔵 Lazada</button>
+    <button class="tab" data-p="tiktok">⚫ TikTok</button>
+  </div>
+</header>
+
+<main>
+  <div class="metrics" id="metrics"></div>
+  <div id="warn"></div>
+
+  <div class="charts-grid full" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">ยอดขาย GMV รายเดือน (บาท)</div>
+      <div class="legend" id="leg-gmv"></div>
+      <div style="position:relative;height:240px">
+        <canvas id="gmvChart" role="img" aria-label="กราฟยอดขาย GMV รายเดือน ม.ค.-พ.ค. 2569">GMV chart</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">% Gross Profit รายเดือน</div>
+      <div class="legend" id="leg-gp"></div>
+      <div style="position:relative;height:210px">
+        <canvas id="gpChart" role="img" aria-label="กราฟ Gross Profit % รายเดือน">GP chart</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROAS รายเดือน</div>
+      <div class="legend" id="leg-roas"></div>
+      <div style="position:relative;height:210px">
+        <canvas id="roasChart" role="img" aria-label="กราฟ ROAS รายเดือน">ROAS chart</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">ค่าโฆษณา vs กำไรขั้นต้น (บาท)</div>
+      <div class="legend" id="leg-cost"></div>
+      <div style="position:relative;height:210px">
+        <canvas id="costChart" role="img" aria-label="กราฟค่าโฆษณาและกำไรขั้นต้น">Cost chart</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">% ต้นทุนสินค้า / STM รายเดือน</div>
+      <div class="legend" id="leg-cogs"></div>
+      <div style="position:relative;height:210px">
+        <canvas id="cogsChart" role="img" aria-label="กราฟเปอร์เซ็นต์ต้นทุนสินค้า">COGS chart</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MONTHLY DIFF + % ===== -->
+  <div class="section-heading">⚡ เปรียบเทียบรายเดือน — ตัวเลข & % เทียบ GMV</div>
+
+  <div id="diffTables"></div>
+
+  <!-- ===== FIX RECOMMENDATIONS ===== -->
+  <div class="section-heading">🛠 วิธีแก้ไขตามสาเหตุ</div>
+  <div class="fix-grid">
+
+    <div class="fix-card critical">
+      <div class="fix-header">
+        <span class="fix-badge crit">วิกฤต #1</span>
+        <div class="fix-title">Shopee: ค่า Affiliate พุ่ง 192% ใน พ.ค.</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">พ.ค.</span> 2.12M = 20.9% ของ GMV (ปกติควร &lt;15%)<br>
+        <ul>
+          <li>ปิด Affiliate หรือ Cap rate ไว้ที่ 12–14% ก่อนเข้าแคมเปญ</li>
+          <li>บวกต้นทุน Affiliate เข้า Floor Price ทุกครั้ง</li>
+          <li>แยก SKU ที่เปิด Affiliate ออกจาก SKU margin ต่ำ</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card critical">
+      <div class="fix-header">
+        <span class="fix-badge crit">วิกฤต #2</span>
+        <div class="fix-title">Shopee: โค้ดส่วนลดร้านค้า ติดลบ พ.ค. (–291K)</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">พ.ค.</span> ร้านออกส่วนลดมากกว่าได้รับคืน = ขาดทุนทันที<br>
+        <ul>
+          <li>กำหนด Min. Price = ต้นทุน + ค่าแพลตฟอร์ม + ค่า Affiliate + กำไรขั้นต่ำ</li>
+          <li>ห้ามตั้งโค้ดส่วนลดบน SKU ที่มี GP&lt;20%</li>
+          <li>ใช้ Bundle Deal แทน Voucher เพื่อควบคุม margin</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card critical">
+      <div class="fix-header">
+        <span class="fix-badge crit">วิกฤต #3</span>
+        <div class="fix-title">TikTok: โค้ดส่วนลดร้านค้า 10–11% ทุกเดือน</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">ม.ค.–พ.ค.</span> รวม 8.6M บาทใน 5 เดือน<br>
+        <ul>
+          <li>ปรับ Floor Price ให้รวม 11% ส่วนลด TikTok ไว้แล้ว</li>
+          <li>ลด Voucher Face Value ลง 20–30% และใช้ Min. Spend แทน</li>
+          <li>ทำ A/B test: ไม่ออกโค้ด vs ออกโค้ด เทียบ Conversion rate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card critical">
+      <div class="fix-header">
+        <span class="fix-badge crit">วิกฤต #4</span>
+        <div class="fix-title">TikTok: โฆษณา มี.ค. = 5M แต่ GP เหลือ 13.65%</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">มี.ค.</span> ROAS 2.48x — จ่ายโฆษณาเพิ่ม 67% แต่กำไรไม่เพิ่ม<br>
+        <ul>
+          <li>กำหนด Target ROAS ขั้นต่ำ 3.5x ก่อน Scale Budget</li>
+          <li>Pause Ad Group ที่ ROAS &lt;2.5x ทันที ไม่รอสิ้นเดือน</li>
+          <li>เพิ่มงบเฉพาะ Top SKU ที่มี GP&gt;25% เท่านั้น</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card critical">
+      <div class="fix-header">
+        <span class="fix-badge crit">วิกฤต #5</span>
+        <div class="fix-title">ต้นทุนสินค้า Shopee: 31.7% → 44.5% ใน 5 เดือน</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">พ.ค.</span> เพิ่มขึ้น +12.8 จุดตลอด 5 เดือน<br>
+        <ul>
+          <li>ตรวจสอบ Product Mix — SKU ราคาต่ำ/margin ต่ำขายดีขึ้น</li>
+          <li>ต่อรองต้นทุนกับ Supplier สำหรับ SKU ขายดี TOP 20%</li>
+          <li>จัด SKU เป็น Tier A/B/C ตาม GP% และ Set Min. Price แยกตาม Tier</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card warning">
+      <div class="fix-header">
+        <span class="fix-badge warn">เฝ้าระวัง #6</span>
+        <div class="fix-title">Lazada: ต้นทุนสินค้า ก.พ.–มี.ค. พุ่ง +294%/+411%</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">ก.พ.</span><span class="month-tag bad">มี.ค.</span> จาก 119K → 607K บาท<br>
+        <ul>
+          <li>ตรวจสอบว่า ก.พ.–มี.ค. มีการ Push Stock / สั่งล็อตใหม่ผิดปกติ</li>
+          <li>Compare Product Mix เดือน ม.ค. vs ก.พ. ว่า SKU แพงขึ้นหรือเปลี่ยน</li>
+          <li>กำหนด Budget Cap ต้นทุนสินค้าต่อเดือน ห้ามเกิน 35% ของ projected STM</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card warning">
+      <div class="fix-header">
+        <span class="fix-badge warn">เฝ้าระวัง #7</span>
+        <div class="fix-title">Lazada: ส่วนลดคอยย์ 10% ทุกเดือน (รวม 1M บาท)</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">ม.ค.–พ.ค.</span> ค่า Coin ออกจากร้านค้าล้วนๆ<br>
+        <ul>
+          <li>บวก Coin Cost เข้าราคาขายตั้งแต่ก่อน List สินค้า</li>
+          <li>เลือกร่วม Campaign เฉพาะ SKU ที่ GP&gt;40% เพื่อรองรับ Coin 10%</li>
+          <li>ติดต่อ Lazada AM ขอ negotiate Coin Subsidy Rate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fix-card warning">
+      <div class="fix-header">
+        <span class="fix-badge warn">เฝ้าระวัง #8</span>
+        <div class="fix-title">TikTok: ค่าธุรกรรม 6.5–8% (Shopee/Lazada แค่ 3–4%)</div>
+      </div>
+      <div class="fix-body">
+        <span class="month-tag bad">ม.ค.–พ.ค.</span> รวม 5.8M บาท — แพงกว่า 2x<br>
+        <ul>
+          <li>ตรวจสอบ Payment Method ที่ลูกค้าใช้ — Credit Card มี Fee สูงกว่า COD</li>
+          <li>ส่งเสริม Bank Transfer / PromptPay ด้วย Coupon พิเศษ เพื่อลด Card Fee</li>
+          <li>สอบถาม TikTok AM ว่ามี Payment Plan ที่ Fee ต่ำกว่าสำหรับ Volume สูง</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>HOMMKESA Internal Report &nbsp;|&nbsp; จัดทำ: 19 มิถุนายน 2569 &nbsp;|&nbsp; ข้อมูลลับเฉพาะภายในองค์กร</footer>
+
+<script>
+const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.']
+const DATA = {
+  shopee: { name:'Shopee', color:'#EE4D2D', dash:[],
+    gmv:[4560621,6369290,7146593,5745984,10123142],
+    stm:[3137412,4257535,4792706,3744974,6273710],
+    ads:[696100,1312100,1490116,1326900,2366545],
+    cost:[993340,1399433,1755910,1475810,2790830],
+    gross:[1447972,1546002,1546680,942264,1116335],
+    gp:[46.15,36.31,32.27,25.16,17.79],
+    roas:[4.51,3.24,3.22,2.82,2.65],
+    cogsPct:[31.66,32.87,36.64,39.41,44.48]
+  },
+  lazada: { name:'Lazada', color:'#1251B5', dash:[6,3],
+    gmv:[941299,2315699,2851412,1801264,1612320],
+    stm:[575855,1455572,1781504,1083716,937631],
+    ads:[100310,206290,406980,221400,285780],
+    cost:[118740,467760,607490,380890,325830],
+    gross:[356805,781522,767034,481426,326021],
+    gp:[61.96,53.69,43.06,44.42,34.77],
+    roas:[5.74,7.06,4.38,4.89,3.28],
+    cogsPct:[20.62,32.14,34.10,35.15,34.75]
+  },
+  tiktok: { name:'TikTok', color:'#444444', dash:[2,2],
+    gmv:[12114041,13848971,18099793,12362871,12436259],
+    stm:[8212775,9397620,12383132,8389390,8399281],
+    ads:[2991827,3432837,5002195,2979924,3448908],
+    cost:[3656640,4233310,5690670,3907680,3716290],
+    gross:[1564308,1731472,1690267,1501786,1234082],
+    gp:[19.05,18.42,13.65,17.90,14.69],
+    roas:[2.75,2.74,2.48,2.82,2.44],
+    cogsPct:[44.52,45.05,45.96,46.58,44.25]
+  }
+}
+const PKEYS = ['shopee','lazada','tiktok']
+
+let activePlatform = 'all'
+const charts = {}
+
+function getPlatforms() {
+  return activePlatform === 'all' ? PKEYS : [activePlatform]
+}
+function sum(arr) { return arr.reduce((a,b)=>a+b,0) }
+function avg(arr) { return arr.reduce((a,b)=>a+b,0)/arr.length }
+function fmtM(n) { return (Math.round(n/100000)/10).toFixed(1) + 'M' }
+function fmtB(n) { return '฿' + Math.round(n).toLocaleString('th-TH') }
+
+function renderMetrics() {
+  const pkeys = getPlatforms()
+  const gmvT = sum(pkeys.flatMap(k=>DATA[k].gmv))
+  const stmT = sum(pkeys.flatMap(k=>DATA[k].stm))
+  const grossT = sum(pkeys.flatMap(k=>DATA[k].gross))
+  const adsT = sum(pkeys.flatMap(k=>DATA[k].ads))
+  const gpAvg = (grossT/stmT*100)
+  const roasAvg = stmT > 0 ? stmT/adsT : 0
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">ยอดขาย GMV รวม</div>
+      <div class="metric-value">${fmtM(gmvT)}</div>
+      <div class="metric-sub">บาท (ม.ค.–พ.ค. 2569)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ยอดโอนจริง STM</div>
+      <div class="metric-value">${fmtM(stmT)}</div>
+      <div class="metric-sub">บาท</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">กำไรขั้นต้น</div>
+      <div class="metric-value">${fmtM(grossT)}</div>
+      <div class="metric-sub ${gpAvg>30?'trend-up':'trend-dn'}">${gpAvg.toFixed(1)}% GP margin</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ค่าโฆษณารวม</div>
+      <div class="metric-value">${fmtM(adsT)}</div>
+      <div class="metric-sub">ROAS เฉลี่ย ${roasAvg.toFixed(2)}x</div>
+    </div>
+  `
+}
+
+function renderWarn() {
+  const pkeys = getPlatforms()
+  const warns = []
+  if (pkeys.includes('shopee')) warns.push('🟠 Shopee GP พ.ค. เหลือ <b>17.79%</b> จาก ม.ค. 46.15% ลดลง 28 จุดใน 5 เดือน')
+  if (pkeys.includes('tiktok')) warns.push('⚫ TikTok GP เฉลี่ยเพียง <b>16.5%</b> และ ROAS ต่ำสม่ำเสมอ 2.44–2.82x')
+  if (pkeys.includes('lazada')) warns.push('🔵 Lazada ยอดขายลดลง 43% จาก peak มี.ค. สู่ พ.ค.')
+  document.getElementById('warn').innerHTML = warns.length
+    ? `<div class="warn"><span>⚠</span><span>${warns.join(' &nbsp;&nbsp; ')}</span></div>` : ''
+}
+
+function makeLegend(id, ds) {
+  document.getElementById(id).innerHTML = ds.map(d =>
+    `<span class="leg"><span class="leg-dot" style="background:${d.borderColor||d.backgroundColor}"></span>${d.label}</span>`
+  ).join('')
+}
+
+function buildLineDs(field) {
+  return getPlatforms().map(k => {
+    const d = DATA[k]
+    return {
+      label: d.name,
+      data: d[field],
+      borderColor: d.color,
+      backgroundColor: d.color + '22',
+      borderWidth: 2.5,
+      borderDash: d.dash,
+      tension: .35,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      fill: false
+    }
+  })
+}
+
+function destroyChart(id) {
+  const c = Chart.getChart(id)
+  if (c) c.destroy()
+}
+
+const TICK = { color: '#888', font: { size: 11 } }
+const GRID = { color: 'rgba(128,128,128,0.1)' }
+const NO_LEGEND = { display: false }
+
+function initCharts() {
+  const pkeys = getPlatforms()
+
+  // GMV bar
+  destroyChart('gmvChart')
+  const gmvDs = pkeys.map(k => ({
+    label: DATA[k].name,
+    data: DATA[k].gmv,
+    backgroundColor: DATA[k].color + 'bb',
+    borderColor: DATA[k].color,
+    borderWidth: 1.5,
+    borderRadius: 4
+  }))
+  makeLegend('leg-gmv', gmvDs)
+  charts.gmv = new Chart(document.getElementById('gmvChart'), {
+    type: 'bar',
+    data: { labels: MONTHS, datasets: gmvDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: NO_LEGEND, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtB(ctx.raw)}` }}},
+      scales: {
+        x: { ticks: { ...TICK, autoSkip: false }, grid: GRID },
+        y: { ticks: { ...TICK, callback: v => v>=1000000 ? Math.round(v/100000)/10+'M' : Math.round(v/1000)+'K' }, grid: GRID }
+      }
+    }
+  })
+
+  // GP line
+  destroyChart('gpChart')
+  const gpDs = buildLineDs('gp')
+  makeLegend('leg-gp', gpDs)
+  charts.gp = new Chart(document.getElementById('gpChart'), {
+    type: 'line',
+    data: { labels: MONTHS, datasets: gpDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: NO_LEGEND },
+      scales: {
+        x: { ticks: { ...TICK, autoSkip: false }, grid: GRID },
+        y: { ticks: { ...TICK, callback: v => v+'%' }, grid: GRID, min: 0, max: 70 }
+      }
+    }
+  })
+
+  // ROAS line
+  destroyChart('roasChart')
+  const roasDs = buildLineDs('roas')
+  makeLegend('leg-roas', roasDs)
+  charts.roas = new Chart(document.getElementById('roasChart'), {
+    type: 'line',
+    data: { labels: MONTHS, datasets: roasDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: NO_LEGEND },
+      scales: {
+        x: { ticks: { ...TICK, autoSkip: false }, grid: GRID },
+        y: { ticks: { ...TICK, callback: v => v+'x' }, grid: GRID, min: 0, suggestedMax: 8 }
+      }
+    }
+  })
+
+  // Ads vs Gross grouped bar
+  destroyChart('costChart')
+  const costDs = []
+  pkeys.forEach(k => {
+    const d = DATA[k]
+    costDs.push({ label: d.name+' โฆษณา', data: d.ads, backgroundColor: d.color+'66', borderColor: d.color, borderWidth: 1.5, borderRadius: 4 })
+    costDs.push({ label: d.name+' กำไร', data: d.gross, backgroundColor: d.color+'cc', borderColor: d.color, borderWidth: 1.5, borderRadius: 4 })
+  })
+  makeLegend('leg-cost', pkeys.map(k => ({ label: DATA[k].name, borderColor: DATA[k].color, backgroundColor: DATA[k].color })))
+  charts.cost = new Chart(document.getElementById('costChart'), {
+    type: 'bar',
+    data: { labels: MONTHS, datasets: costDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: NO_LEGEND, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtB(ctx.raw)}` }}},
+      scales: {
+        x: { ticks: { ...TICK, autoSkip: false }, grid: GRID },
+        y: { ticks: { ...TICK, callback: v => v>=1000000 ? Math.round(v/100000)/10+'M' : Math.round(v/1000)+'K' }, grid: GRID }
+      }
+    }
+  })
+
+  // COGS %
+  destroyChart('cogsChart')
+  const cogsDs = buildLineDs('cogsPct')
+  makeLegend('leg-cogs', cogsDs)
+  charts.cogs = new Chart(document.getElementById('cogsChart'), {
+    type: 'line',
+    data: { labels: MONTHS, datasets: cogsDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: NO_LEGEND },
+      scales: {
+        x: { ticks: { ...TICK, autoSkip: false }, grid: GRID },
+        y: { ticks: { ...TICK, callback: v => v+'%' }, grid: GRID, min: 15, max: 55 }
+      }
+    }
+  })
+}
+
+function render() {
+  renderMetrics()
+  renderWarn()
+  initCharts()
+}
+
+// ===== ANOMALY DETAIL DATA =====
+const ANOMALY_DATA = {
+  shopee: {
+    emoji: '🟠', name: 'Shopee',
+    rows: [
+      { label: 'ยอดขาย GMV',                       vals:[4560621,6369290,7146593,5745984,10123142], cls:['d-ok','d-ok','d-ok','d-warn','d-ok'] },
+      { label: 'ค่าขนส่งสินค้า',                    vals:[136020,224374,209058,190912,395219],       cls:['d-ok','d-ok','d-ok','d-ok','d-warn'] },
+      { label: 'โค้ดส่วนลดร้านค้า',                 vals:[6057,76840,51221,69714,-290851],            cls:['d-ok','d-warn','d-warn','d-warn','d-neg'] },
+      { label: 'ค่าธรรมเนียมการขายสินค้า',           vals:[374233,522687,629119,534083,1228824],      cls:['d-ok','d-ok','d-warn','d-warn','d-crit'] },
+      { label: 'ค่าธรรมเนียมธุรกรรมทางการเงิน',      vals:[165952,228329,260865,213007,426119],       cls:['d-ok','d-ok','d-ok','d-ok','d-bad'] },
+      { label: 'ค่า Affiliate',                     vals:[725659,1057078,1167568,978610,2120405],     cls:['d-warn','d-warn','d-bad','d-bad','d-crit'] },
+      { label: 'ค่าโฆษณา',                          vals:[696100,1312100,1490116,1326900,2366545],    cls:['d-warn','d-bad','d-bad','d-bad','d-crit'] },
+      { label: 'ต้นทุนสินค้า',                       vals:[993340,1399433,1755910,1475810,2790830],   cls:['d-ok','d-ok','d-warn','d-warn','d-bad'] },
+      { label: 'กำไรขั้นต้น',                        vals:[1447972,1546002,1546680,942264,1116335],   cls:['d-ok','d-warn','d-warn','d-bad','d-crit'], isGp:true },
+    ],
+    gmv:[4560621,6369290,7146593,5745984,10123142]
+  },
+  lazada: {
+    emoji: '🔵', name: 'Lazada',
+    rows: [
+      { label: 'ยอดขาย GMV',                       vals:[941299,2315699,2851412,1801264,1612320],   cls:['d-warn','d-ok','d-ok','d-warn','d-bad'] },
+      { label: 'ค่าขนส่งสินค้า',                    vals:[46398,94407,121544,75103,79506],            cls:['d-ok','d-ok','d-ok','d-ok','d-ok'] },
+      { label: 'โค้ดส่วนลดร้านค้า',                 vals:[43174,139120,118302,110901,109322],         cls:['d-warn','d-bad','d-bad','d-bad','d-bad'] },
+      { label: 'ส่วนลดคอยย์',                       vals:[94262,225276,287663,177663,160710],         cls:['d-warn','d-bad','d-crit','d-bad','d-bad'] },
+      { label: 'ค่าธรรมเนียมการขายสินค้า',           vals:[121881,293448,363542,229385,217769],       cls:['d-ok','d-warn','d-bad','d-warn','d-warn'] },
+      { label: 'ค่า Affiliate',                     vals:[31407,39476,94131,71310,60374],             cls:['d-ok','d-ok','d-crit','d-warn','d-warn'] },
+      { label: 'ค่าโฆษณา',                          vals:[100310,206290,406980,221400,285780],        cls:['d-ok','d-ok','d-crit','d-warn','d-bad'] },
+      { label: 'ต้นทุนสินค้า',                       vals:[118740,467760,607490,380890,325830],       cls:['d-ok','d-crit','d-crit','d-bad','d-bad'] },
+      { label: 'กำไรขั้นต้น',                        vals:[356805,781522,767034,481426,326021],       cls:['d-ok','d-ok','d-warn','d-warn','d-bad'], isGp:true },
+    ],
+    gmv:[941299,2315699,2851412,1801264,1612320]
+  },
+  tiktok: {
+    emoji: '⚫', name: 'TikTok',
+    rows: [
+      { label: 'ยอดขาย GMV',                       vals:[12114041,13848971,18099793,12362871,12436259], cls:['d-ok','d-ok','d-ok','d-ok','d-ok'] },
+      { label: 'ค่าขนส่งสินค้า',                    vals:[19543,22216,30439,33494,38156],                cls:['d-ok','d-ok','d-ok','d-ok','d-ok'] },
+      { label: 'โค้ดส่วนลดร้านค้า',                 vals:[1203078,1472976,1935491,1388358,1392333],      cls:['d-crit','d-crit','d-crit','d-crit','d-crit'] },
+      { label: 'ค่าธรรมเนียมการขายสินค้า',           vals:[363598,405215,537407,401808,400701],           cls:['d-ok','d-ok','d-warn','d-ok','d-ok'] },
+      { label: 'ค่าธรรมเนียมธุรกรรมทางการเงิน',      vals:[817314,906815,1206872,929286,995632],          cls:['d-bad','d-bad','d-crit','d-bad','d-bad'] },
+      { label: 'ค่า Affiliate',                     vals:[1505660,1654073,2013150,1223468,1199264],       cls:['d-crit','d-crit','d-crit','d-bad','d-bad'] },
+      { label: 'ค่าโฆษณา',                          vals:[2991827,3432837,5002195,2979924,3448908],       cls:['d-crit','d-crit','d-crit','d-crit','d-crit'] },
+      { label: 'ต้นทุนสินค้า',                       vals:[3656640,4233310,5690670,3907680,3716290],      cls:['d-crit','d-crit','d-crit','d-crit','d-crit'] },
+      { label: 'กำไรขั้นต้น',                        vals:[1564308,1731472,1690267,1501786,1234082],      cls:['d-bad','d-bad','d-crit','d-bad','d-crit'], isGp:true },
+    ],
+    gmv:[12114041,13848971,18099793,12362871,12436259]
+  }
+}
+
+function fmtAbs(n) {
+  if (Math.abs(n) >= 1000000) return (n<0?'-':'')+Math.abs(Math.round(n/100000)/10).toFixed(1)+'M'
+  if (Math.abs(n) >= 1000) return (n<0?'-':'')+Math.round(Math.abs(n)/1000)+'K'
+  return n.toLocaleString('th-TH')
+}
+function fmtPct(val, base) {
+  const p = (val/base*100)
+  return (p>=0?'+':'')+p.toFixed(1)+'%'
+}
+function fmtDelta(vals) {
+  if (vals.length < 2) return ''
+  const delta = vals[vals.length-1] - vals[0]
+  const pct = (delta/Math.abs(vals[0])*100)
+  const sign = delta>=0?'+':''
+  return `<span style="font-size:10px;color:${delta>0?'#A32D2D':'#3B6D11'}">${sign}${Math.round(pct)}% จาก ม.ค.</span>`
+}
+
+function fmtMoMArrow(curr, prev) {
+  if (prev === undefined) return ''
+  const diff = curr - prev
+  const pct = (diff / Math.abs(prev) * 100)
+  if (Math.abs(pct) < 2) return `<span style="font-size:10px;color:#888">≈0%</span>`
+  const color = diff > 0 ? '#C0392B' : '#27AE60'
+  const arrow = diff > 0 ? '▲' : '▼'
+  return `<span style="font-size:10px;color:${color}">${arrow}${Math.abs(Math.round(pct))}%</span>`
+}
+
+function renderDiffTables() {
+  const pkeys = activePlatform === 'all' ? ['shopee','lazada','tiktok'] : [activePlatform]
+  let html = ''
+  for (const pk of pkeys) {
+    const pd = ANOMALY_DATA[pk]
+    html += `<div class="plat-label">${pd.emoji} ${pd.name}</div>`
+    html += `<div class="diff-table-wrap"><table class="diff-tbl">`
+    html += `<thead><tr>
+      <th>รายการ</th>
+      <th>ม.ค.</th><th>ก.พ.</th><th>มี.ค.</th><th>เม.ย.</th><th>พ.ค.</th>
+      <th style="min-width:80px">รวม ม.ค.→พ.ค.</th>
+    </tr></thead><tbody>`
+
+    for (const row of pd.rows) {
+      // คำนวณ % ของ GMV ทุกเดือน แล้วหาค่าสูงสุด (วัดจาก absolute % เพื่อจับทั้งบวกและลบผิดปกติ)
+      const pcts = row.vals.map((v,i) => v / pd.gmv[i] * 100)
+      const maxPct = Math.max(...pcts)
+
+      html += `<tr>`
+      html += `<td>${row.label}</td>`
+      for (let i=0;i<5;i++) {
+        const v = row.vals[i]
+        const pctOfGmv = pcts[i]
+        const pctStr = (pctOfGmv>=0?'+':'')+pctOfGmv.toFixed(1)+'%'
+        const cls = row.cls[i] || ''
+        const isMax = (pctOfGmv === maxPct)
+        const highlight = row.isGp
+          ? (isMax ? 'color:#1A7A3A;font-weight:600' : '')
+          : ((isMax || v < 0) ? 'color:#C0392B;font-weight:600' : '')
+        const redStyle = highlight
+        html += `<td class="${cls}">
+          <span class="abs-val" style="${redStyle}">${fmtAbs(v)}</span><br>
+          <span class="pct-val" style="${redStyle}">${pctStr} ของ GMV</span>
+        </td>`
+      }
+      html += `<td style="text-align:center">${fmtDelta(row.vals)}</td>`
+      html += `</tr>`
+    }
+
+    html += `</tbody></table></div>`
+  }
+  document.getElementById('diffTables').innerHTML = html
+}
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('[data-p]')
+  if (!tab) return
+  activePlatform = tab.dataset.p
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.p === activePlatform))
+  render()
+  renderDiffTables()
+})
+
+render()
+renderDiffTables()
+</script>
+</body>
+</html>
